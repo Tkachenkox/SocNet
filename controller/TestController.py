@@ -11,9 +11,9 @@ test_blueprint = Blueprint("test_blueprint", __name__, url_prefix="test")
 @test_blueprint.route("/", methods = ['POST'])
 def add() -> Response:
     try:
-        token_required(request)
+        id = token_required(request, need_current_user_id=True)
         data = request.json
-        dto = TestCreateDto(data)
+        dto = TestCreateDto(data, id)
         result = TestService().add(dto.data)
         if type(result) is int:
             return jsonify({'success': f'added test with id {result}'}), 200
@@ -51,25 +51,21 @@ def get() -> Response:
         return jsonify({'error': str(e)}), 400
 
 @test_blueprint.route("/<int:id>", methods = ['PUT'])
-#@token_required()
 def update(id: int) -> Response:
     token_required(request)
     return 200
 
 @test_blueprint.route("/<int:id>", methods = ['DELETE'])
-#@token_required()
 def delete(id: int) -> Response:
     token_required(request)
     return 200
 
 @test_blueprint.route("/start/<int:id>", methods = ['GET'])
-#@token_required()
 def start_test(id: int) -> Response:
     token_required(request)
     return 200
 
 @test_blueprint.route("/check_result/<int:id>", methods = ['POST'])
-#@token_required()
 def check_result(id: int) -> Response:
     token_required(request)
     return 200

@@ -6,7 +6,7 @@ from config import Config
 def generate_token(person: Person):
     token = jwt.encode({
             'id': person.id,
-            'exp' : datetime.utcnow() + timedelta(minutes = 30),
+            'exp' : datetime.utcnow() + timedelta(days=10),
             'role' : person.role_id
         }, 
         Config.SECRET_KEY,

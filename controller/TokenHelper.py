@@ -9,7 +9,10 @@ from flask import jsonify, request
 from flask.globals import current_app
 
 
-def token_required(request: request, need_admin: bool = False, need_superuser: bool = False):
+def token_required(request: request, 
+                    need_admin: bool = False, 
+                    need_superuser: bool = False,
+                    need_current_user_id: bool = False):
     token = None
     if 'Authorization' in request.headers:
         token = request.headers['Authorization']
@@ -31,6 +34,9 @@ def token_required(request: request, need_admin: bool = False, need_superuser: b
                 pass
             else:
                 raise TokenException('Need superuser permission !!')
+
+        if need_current_user_id:
+            return current_user.id
     except Exception as e:
         print(e)
         raise TokenException('Token is invalid!')
