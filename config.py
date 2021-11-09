@@ -2,11 +2,16 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
+import logging
+
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 def get_env(key: str) -> str:
-    return os.environ[key]
+    try:
+        return os.environ[key]
+    except:
+        return False
 
 
 def get_db_uri() -> str:
@@ -16,3 +21,9 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = get_env('SQLALCHEMY_TRACK_MODIFICATIONS')
     SECRET_KEY = get_env('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = get_db_uri()
+    PERSONS_PER_PAGE = get_env('PERSONS_PER_PAGE')
+    LOGGER_FROMATTER = get_env('LOGGER_FROMATTER')
+    LOG_LEVEL = logging.getLevelName(get_env('LOG_LEVEL'))
+    LOG_PATH = get_env('LOG_PATH')
+    IMAGE_PATH = get_env('IMAGE_PATH')
+

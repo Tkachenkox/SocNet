@@ -1,11 +1,12 @@
 from ..extensions import db
-from .EmployeeModel import Employee
+from .PersonModel import Person
 from .SkillModel import Skill
+from .BaseMixin import BaseMixin
 
-class Test(db.Model):
+class Test(BaseMixin, db.Model):
     __tablename__ = "test"
     id = db.Column(db.Integer, primary_key=True)
-    skill_id = db.Column(db.Integer, db.ForeignKey(Skill.id), index=True)
-    creator_id = db.Column(db.Integer, db.ForeignKey(Employee.person_id), index=True)
-    name = db.Column(db.String(32))
-    questions = db.Column(db.String())
+    skill_id = db.Column(db.Integer, db.ForeignKey(Skill.id), index=True, nullable=False)
+    creator_id = db.Column(db.Integer, db.ForeignKey(Person.id), index=True, nullable=False)
+    name = db.Column(db.String(32), nullable=False)
+    questions = db.Column(db.String(), nullable=False)

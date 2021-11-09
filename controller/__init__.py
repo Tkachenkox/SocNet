@@ -1,0 +1,2 @@
+from .PersonController import person_blueprint
+from .TestController import test_blueprint

@@ -8,4 +8,4 @@ class BlueprintGroup:
 
     def register_blueprints(self, app: Flask) -> Flask:
         for blueprint in self.blueprints:
-            app.register_blueprint(blueprint, url_prfix=f"{self.url_prefix}/{blueprint.url_prefix}")
+            app.register_blueprint(blueprint, url_prefix=f"/{self.url_prefix}/{blueprint.url_prefix}")

@@ -1,7 +1,7 @@
-class PersonDataDto:
+class PersonUpdateDto:
 
-    def __init__(self, name: str, last_name: str, birtday: str,
-                    phone_number: str, email: str, gender: int, password: str, position: str, second_name=None):
+    def __init__(self, name=None, last_name=None, birtday=None, phone_number=None, 
+                    email=None, gender=None, password=None, second_name=None):
         self.data = {
             'name': name,
             'second_name': second_name,
@@ -10,6 +10,5 @@ class PersonDataDto:
             'phone_number': phone_number,
             'email': email,
             'gender': gender,
-            'password': password,
-            'position': position,
+            'password': password
         }
