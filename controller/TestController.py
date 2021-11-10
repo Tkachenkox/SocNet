@@ -3,7 +3,7 @@ import json
 from bll.TestService import TestService
 from flask import Blueprint, Response, jsonify, request, current_app
 
-from .Dto import TestCreateDto
+from .Dto import TestCreateDto, TestUpdateDto
 from .TokenHelper import token_required
 
 test_blueprint = Blueprint("test_blueprint", __name__, url_prefix="test")
@@ -27,7 +27,6 @@ def get_by_id(id: int) -> Response:
     try:
         token_required(request)
         test = TestService().get_by_id(id)
-        print(test)
         if test:
             return jsonify({'success': test}), 200
         else:
@@ -52,20 +51,42 @@ def get() -> Response:
 
 @test_blueprint.route("/<int:id>", methods = ['PUT'])
 def update(id: int) -> Response:
-    token_required(request)
-    return 200
+    try:
+        id = token_required(request, need_current_user_id=True)
+        data = request.json
+        if data:
+            dto = TestUpdateDto(data)
+            result = TestService().update(id, dto.data)
+            if type(result) is bool:
+                return jsonify({'success': 'test updated'}), 200
+            return jsonify({'error': result}), 400
+    except Exception as e:
+        return jsonify({'error': e}), 400
 
 @test_blueprint.route("/<int:id>", methods = ['DELETE'])
 def delete(id: int) -> Response:
-    token_required(request)
-    return 200
+    try:
+        creator_id = token_required(request, need_current_user_id=True)
+        if TestService().delete(id, creator_id):
+            return jsonify({'success': 'test deleted'}), 200
+        return jsonify({'error': 'test not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 @test_blueprint.route("/start/<int:id>", methods = ['GET'])
 def start_test(id: int) -> Response:
-    token_required(request)
-    return 200
+    try:
+        person_id = token_required(request, need_current_user_id=True)
+        test = TestService().start_test(id, person_id)
+        if test:
+            return jsonify({'success': test}), 200
+        return jsonify({'error': 'test not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 @test_blueprint.route("/check_result/<int:id>", methods = ['POST'])
 def check_result(id: int) -> Response:
-    token_required(request)
-    return 200
+    try:
+        token_required(request)
+    except:
+        return 200

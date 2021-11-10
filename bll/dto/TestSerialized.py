@@ -16,3 +16,4 @@ class TestSerializer:
             'name': test.name,
             'questions': questions_returnable,
         }
+        self.count = len(questions_returnable)

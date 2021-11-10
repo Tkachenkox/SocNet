@@ -3,7 +3,7 @@ from datetime import datetime
 
 from app.exceptions import TestException
 from app.validation import TestValidator
-from dal import Test, db
+from dal import Test, db, TestResult
 
 from .dto import TestSerializer, TestSerializerView
 
@@ -62,16 +62,56 @@ class TestService:
 
 
     def update(self, id: int, data: dict) -> bool:
-        pass
+        try:
+            form = TestValidator(data=data)
+            if form.validate():
+                test = Test.query.filter_by(id=id, remove_date=None).first()
+                if test.creator_id != id:
+                    raise TestException("Not creator")
+                d = {i: data[i] for i in data if data[i]}
+                questions = json.loads(test.questions)
+                if d.get('questions'):
+                    q = json.loads(d['questions'])
+                    for i in q:
+                        questions.append({k:i[k] for k in i})
+                    test.questions = json.dumps(questions)
+                if d.get('skill_id'):
+                    test.skill_id = int(d['skill_id'])
+                if d.get('name'):
+                    test.name = int(d['name'])
+                db.session.commit()
+                return True
+            return form.errors
+        except Exception as e:
+            raise TestException(str(e))
+        
 
-    def delete(self, id: int) -> bool:
-        pass
+    def delete(self, test_id: int, creator_id: int) -> bool:
+        try:
+            test = Test.query.filter_by(id=test_id, remove_date=None).first()
+            if test:
+                if test.creator_id != creator_id:
+                    raise TestException("Not creator")
+                test.remove_date = datetime.utcnow()
+                db.session.commit()
+                return True
+            return None
+        except Exception as e:
+            raise TestException(str(e))
 
-    def start_test(self, id: int) -> dict:
+    def start_test(self, id: int, person_id: int) -> dict:
         try:
             test = Test.query.filter_by(id=id, remove_date=None).first()
             if test:
-                return TestSerializer(test).data
+                serialized = TestSerializer(test)
+                new_result = TestResult(
+                    test_id = id,
+                    person_id = person_id,
+                    count_questions = serialized.count
+                )
+                db.session.add(new_result)
+                db.session.commit()
+                return serialized.data
             return None
         except Exception as e:
             raise TestException(e)

@@ -13,3 +13,9 @@ class TestValidator(Form):
     name = StringField('name', [DataRequired(message='Empty field')])
     questions = StringField(
         'questions', [DataRequired(message='Empty field'), is_valid_questions])
+
+class TestUpdateValidator(Form):
+    skill_id = StringField('skill_id', [Optional()])
+    creator_id = StringField('creator_id', [Optional()])
+    name = StringField('name', [Optional()])
+    questions = StringField('questions', [Optional(), is_valid_questions])

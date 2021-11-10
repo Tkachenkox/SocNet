@@ -12,7 +12,6 @@ def is_valid_questions(form: Form, field: StringField) -> bool:
         questions = json.loads(field.data)
         if questions:
             for i in questions:
-                print(i)
                 question = i.get('question')
                 correct_answer = i.get('correct_answer')
                 if (question is None or correct_answer is None):
