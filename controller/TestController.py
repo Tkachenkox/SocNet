@@ -1,7 +1,7 @@
 import json
 
 from bll.TestService import TestService
-from flask import Blueprint, Response, jsonify, request, current_app
+from flask import Blueprint, Response, current_app, jsonify, request
 
 from .Dto import TestCreateDto, TestUpdateDto
 from .TokenHelper import token_required
@@ -85,8 +85,12 @@ def start_test(id: int) -> Response:
         return jsonify({'error': str(e)}), 400
 
 @test_blueprint.route("/check_result/<int:id>", methods = ['POST'])
-def check_result(id: int) -> Response:
+def check_result(id_test: int) -> Response:
     try:
-        token_required(request)
-    except:
-        return 200
+        data = request.json
+        id_person = token_required(request, need_current_user_id=True)
+        result = TestService().check_result(id_test, id_person, data)
+        if result == 0:
+            return jsonify({'result': f'{result} point(s)'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400

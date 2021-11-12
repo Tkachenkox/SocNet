@@ -117,6 +117,15 @@ class PersonService:
             raise PersonException(e)
 
 
+    def check_person(self, id: int) -> bool:
+        try:
+            person = Person.query.filter_by(id=id, remove_date=None).first()
+            if person:
+                return True
+            return False
+        except:
+            return False
+
     def __make_dict(self, row) -> dict:
         return {
             'id': row[0],

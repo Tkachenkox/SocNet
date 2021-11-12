@@ -3,9 +3,10 @@ from datetime import datetime
 
 from app.exceptions import TestException
 from app.validation import TestValidator
-from dal import Test, db, TestResult
+from dal import Test, TestResult, db
 
 from .dto import TestSerializer, TestSerializerView
+from .PersonService import PersonService
 
 
 class TestService:
@@ -117,8 +118,62 @@ class TestService:
             raise TestException(e)
 
 
-    def check_result(self, id: int, data: dict):
+    def check_result(self, id: int, person_id: int, data: dict):
+        try:
+            if not PersonService().check_person(id):
+                raise TestException("Person doesn't exist")
+            if not self.__check_test(id):
+                raise TestException("Test doesn't exist")
+            if not self.__check_test_result(id, person_id):
+                raise TestException(f"Person with id {id} doesn't begining this test")
+            
+            count, correct = self.__compare_answers(id, data['answers'])
+            if count == 0:
+                return 0
+
+        except Exception as e:
+            raise TestException(str(e))
+
+    def __compare_answers(self, test_id: int, answers: list):
+        correct = self.__get_correct_answers(test_id)
+        if (len(correct) != len(correct)):
+            raise TestException('Quantity of answers and correct answers are not equal')
+        count = 0
+        for i in range(len(answers)):
+            if (correct[i][f'correct_answer_{i}'] == answers[i][f'answer_{i}']):
+                count += 1
+        return count, len(correct)
+
+    def __calculate_result(self, person_id: int, count: int, correct: int):
         pass
+
+    def __get_correct_answers(self, id: int) -> list:
+        test = Test.query.filter_by(id=id, remove_date=None).first()
+        questions = json.loads(test.questions)
+        answers_returnable = []
+        index = 1
+        for i in questions:
+                answers_returnable.append({f'correct_answer_{index}': i['correct_answer']})
+        return answers_returnable
+
+    def __check_test(self, id: int) -> bool:
+        try:
+            test = Test.query.filter_by(id=id, remove_date=None).first()
+            if test:
+                return True
+            return False
+        except:
+            return False
+
+    def __check_test_result(self, id_test: int, id_person: int) -> bool:
+        try:
+            test = TestResult.query.filter_by(test_id=id_test, person_id=id_person, remove_date=None)\
+                    .order_by(TestResult.begin_date.desc()).first()
+            if test:
+                return True
+            return False
+        except:
+            return False
 
     def __make_dict_without_questions(self, row: set) -> dict:
         return {
