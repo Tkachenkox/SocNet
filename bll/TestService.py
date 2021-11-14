@@ -129,12 +129,17 @@ class TestService:
             
             count, correct = self.__compare_answers(id, data['answers'])
             if count == 0:
-                return 0
+                return False, 0
+
+            result, points = self.__calculate_result(person_id=person_id, count=count, correct=correct)
+            if result:
+                return True, points
+            return False, points
 
         except Exception as e:
             raise TestException(str(e))
 
-    def __compare_answers(self, test_id: int, answers: list):
+    def __compare_answers(self, test_id: int, answers: list) -> int:
         correct = self.__get_correct_answers(test_id)
         if (len(correct) != len(correct)):
             raise TestException('Quantity of answers and correct answers are not equal')
@@ -144,8 +149,11 @@ class TestService:
                 count += 1
         return count, len(correct)
 
-    def __calculate_result(self, person_id: int, count: int, correct: int):
-        pass
+    def __calculate_result(self, person_id: int, count: int, correct: int, max_points: int):
+        points = int(max_points * int((correct - count)/correct*100))
+        result = PersonService().update_skill_point(person_id=person_id, added_points=points)
+        return result, points
+
 
     def __get_correct_answers(self, id: int) -> list:
         test = Test.query.filter_by(id=id, remove_date=None).first()

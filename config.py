@@ -26,4 +26,5 @@ class Config(object):
     LOG_LEVEL = logging.getLevelName(get_env('LOG_LEVEL'))
     LOG_PATH = get_env('LOG_PATH')
     IMAGE_PATH = get_env('IMAGE_PATH')
+    LEVEL_CONSTANT = int(get_env('LEVEL_CONSTANT'))
 

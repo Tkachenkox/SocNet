@@ -1,8 +1,11 @@
 from datetime import datetime
 from re import T
 
+from sqlalchemy.orm import relation
+
 from app.exceptions import PersonException
 from app.validation import PersonUpdateValidator, PersonValidator
+from config import Config
 from dal import Person, db, person_skills
 
 from bll.SkillService import SkillService
@@ -125,6 +128,27 @@ class PersonService:
             return False
         except:
             return False
+
+    
+    def update_skill_point(self, person_id: int, added_points: int):
+        person = Person.query.filter_by(id=person_id, remove_date=None).first()
+        skill_point = person.skill_point
+        skill_point += added_points
+        points = self.__check_level(skill_point, person.level)
+        if points:
+            person.level = person.level + 1
+            person.skill_point = points
+            return 1
+        person.skill_point = skill_point
+        return 0
+
+    
+    def __check_level(self, skill_point: int, level: int):
+        import math
+        point_for_level = Config.LEVEL_CONSTANT * math.sqrt(level*(Config.LEVEL_CONSTANT - 2))
+        if skill_point >=  point_for_level:
+            return skill_point - point_for_level
+        return False
 
     def __make_dict(self, row) -> dict:
         return {
