@@ -145,7 +145,7 @@ class PersonService:
     
     def __check_level(self, skill_point: int, level: int):
         import math
-        point_for_level = Config.LEVEL_CONSTANT * math.sqrt(level*(Config.LEVEL_CONSTANT - 2))
+        point_for_level = Config.LEVEL_CONSTANT * level * math.sqrt(level * 100)
         if skill_point >=  point_for_level:
             return skill_point - point_for_level
         return False
