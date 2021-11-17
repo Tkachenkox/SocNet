@@ -2,8 +2,7 @@
 /Lib
 /Scripts
 pyvenv.cfg
-*.env
-docker-compose.yaml
+.env
 /include
 *__pycache__
 *.log

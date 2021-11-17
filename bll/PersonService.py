@@ -1,12 +1,11 @@
 from datetime import datetime
 from re import T
 
-from sqlalchemy.orm import relation
-
 from app.exceptions import PersonException
 from app.validation import PersonUpdateValidator, PersonValidator
 from config import Config
 from dal import Person, db, person_skills
+from sqlalchemy.orm import relation
 
 from bll.SkillService import SkillService
 
@@ -144,8 +143,7 @@ class PersonService:
 
     
     def __check_level(self, skill_point: int, level: int):
-        import math
-        point_for_level = Config.LEVEL_CONSTANT * level * math.sqrt(level * 100)
+        point_for_level = Config.LEVEL_CONSTANT * ((level * (level + 1))/2)
         if skill_point >=  point_for_level:
             return skill_point - point_for_level
         return False
