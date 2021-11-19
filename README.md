@@ -15,6 +15,10 @@ POSTGRES_PASSWORD=postgres_user_password
 POSTGRES_HOST=host
 POSTGRES_DB=name_of_db
 PERSONS_PER_PAGE=5
+LOGGER_FROMATTER=%(asctime)s:%(name)s:%(levelname)s:%(message)s
+LOG_LEVEL=INFO
+LOG_PATH=app.log
+LEVEL_CONSTANT = 5
 ```
 
 To create migrations and run application correctly, need to run `export FLASK_APP=main:app` on Unix 
