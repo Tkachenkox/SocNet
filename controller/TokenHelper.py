@@ -20,7 +20,6 @@ def token_required(request: request,
         raise TokenException('Token is missing')
     try:
         data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
-        print(data)
         current_user = Person.query.filter_by(id=data['id'], remove_date=None).first() 
         if need_admin:
             role = Role.query.filter_by(id=current_user.role_id).first()
@@ -40,5 +39,5 @@ def token_required(request: request,
             return current_user.id
     except Exception as e:
         print(e)
-        raise TokenException('Token is invalid!')
+        raise TokenException(str(e))
 

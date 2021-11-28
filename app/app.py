@@ -1,7 +1,7 @@
 from flask import Flask
 from config import Config
 from .BlueprintGroup import BlueprintGroup
-from controller import test_blueprint, person_blueprint
+from controller import test_blueprint, person_blueprint, skill_blueprint
 import logging
 import logging.handlers
 from .middleware import LoggerMiddleware
@@ -11,7 +11,7 @@ def create_app(config: Config) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config)
     logger = create_logger(config)
-    BlueprintGroup('api', test_blueprint, person_blueprint).register_blueprints(app)
+    BlueprintGroup('api', test_blueprint, person_blueprint, skill_blueprint).register_blueprints(app)
     app.wsgi_app = LoggerMiddleware(app.wsgi_app, logger)
     return app
 

@@ -84,14 +84,14 @@ def start_test(id: int) -> Response:
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@test_blueprint.route("/check_result/<int:id>", methods = ['POST'])
+@test_blueprint.route("/check_result/<int:id_test>", methods = ['POST'])
 def check_result(id_test: int) -> Response:
     try:
         data = request.json
         id_person = token_required(request, need_current_user_id=True)
         result, points = TestService().check_result(id_test, id_person, data)
         if result:
-            return jsonify({'result': f'{result} point(s) and earned next level!'}), 200
+            return jsonify({'result': f'{points} point(s) and earned next level!'}), 200
         return jsonify({'result': f'{points} point(s)'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400

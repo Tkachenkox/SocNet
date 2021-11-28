@@ -1,11 +1,8 @@
 from datetime import datetime
-from re import T
-
 from app.exceptions import PersonException
 from app.validation import PersonUpdateValidator, PersonValidator
 from config import Config
 from dal import Person, db, person_skills
-from sqlalchemy.orm import relation
 
 from bll.SkillService import SkillService
 
@@ -18,11 +15,12 @@ class PersonService:
     def auth(self, data: dict) -> bool:
         email = data["email"]
         password = data["password"]
-        person = Person.query.filter_by(email=email).first()
-        if person and person.check_password(password):
-            return generate_token(person)
-        
-        return False
+        person = Person.query.filter_by(email=email, remove_date=None).first()
+        if not person:
+            raise PersonException(f"Person with email {email} not found")
+        if not person.check_password(password):
+            raise PersonException(f"Passwords are not equals")
+        return generate_token(person)
 
 
     def create(self, data: dict) -> bool:
@@ -34,7 +32,8 @@ class PersonService:
                 last_name = data['last_name'],
                 birthday = data['birthday'],
                 phone_number = data['phone_number'],
-                email = data['email']
+                email = data['email'],
+                position = data['position']
             )
             new_person.set_password(data["password"])
 
@@ -48,8 +47,8 @@ class PersonService:
                 if e.args[0].split('"')[1] == 'ix_person_phone_number':
                     raise PersonException(f"Person with phone number {data['phone_number']} alredy registred")
                 else:
-                    raise PersonException(f"Person with phone number {data['email']} alredy registred")
-        return form.errors
+                    raise PersonException(f"Person with email {data['email']} alredy registred")
+        raise PersonException(form.errors)
 
     def get_by_id(self, id: int) -> dict:
         person = Person.query.filter_by(id=id, remove_date=None).first()
@@ -96,7 +95,9 @@ class PersonService:
         persons_return = [self.__make_dict(i) for i in persons_from_db.items]
         return persons_return
 
-    def delete(self, id: int) -> bool:
+    def delete(self, id: int, current_id: int) -> bool:
+        if id != current_id:
+            raise PersonException(f"Current user can't delete user with id {id}")
         try:
             person = Person.query.filter_by(id=id, remove_date=None).first()
             if person:
@@ -137,8 +138,10 @@ class PersonService:
         if points:
             person.level = person.level + 1
             person.skill_point = points
+            db.session.commit()
             return 1
         person.skill_point = skill_point
+        db.session.commit()
         return 0
 
     

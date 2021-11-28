@@ -18,6 +18,7 @@ class PersonValidator(Form):
         'phone_number', [DataRequired(message='Empty field'), is_phone_valid])
     email = StringField('email', [DataRequired(
         message='Empty field'), Email(message='Incorrect email')])
+    position = StringField('position', [DataRequired(message='Empty field')])
 
 
 class PersonUpdateValidator(Form):

@@ -15,31 +15,32 @@ def login() -> Response:
         email = data['email'],
         password = data['password']
     )
-    result = PersonService().auth(data = dto.data)
-    if result:
-        return jsonify({'status':f'{result}'}), 200
-    else:
-        return jsonify({'status':'unauthorized'}), 401
+    try:
+        result = PersonService().auth(data = dto.data)
+        if result:
+            return jsonify({'status':f'{result}'}), 200
+    except Exception as e:
+        return jsonify({'status':str(e)}), 401
 
 
 @person_blueprint.route('/', methods=['POST'])
 def create() -> Response:
-    token_required(request, need_admin=True)
-    data = request.json
-    dto = PersonDataDto(
-        name=data['name'],
-        last_name=data['last_name'],
-        second_name=data['second_name'],
-        birtday=data['birthday'],
-        phone_number=data['phone_number'],
-        email=data['email'],
-        gender=data['gender'],
-        password=data['password']
-    )
-
     try:
+        token_required(request, need_admin=True)
+        data = request.json
+        dto = PersonDataDto(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            second_name=data['second_name'],
+            birthday=data['birthday'],
+            phone_number=data['phone_number'],
+            email=data['email'],
+            gender=data['gender'],
+            password=data['password'],
+            position=data['position']
+        )
         result = PersonService().create(dto.data)
-        return jsonify({'status':'id'}), 200
+        return jsonify({'status':f'Person created with id = {result}'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
@@ -80,7 +81,8 @@ def update_by_id(id: int) -> Response:
 @person_blueprint.route('/<int:id>', methods=['DELETE'])
 def delete(id) -> Response:
     try:
-        result = PersonService().delete(id)
+        current_id = token_required(request, need_current_user_id=True)
+        result = PersonService().delete(id, current_id)
         if result:
             return jsonify({'status': 'Success'}), 200
         return jsonify({'error': 'Person not found'}), 404

@@ -22,7 +22,7 @@ def is_valid_questions(form: Form, field: StringField) -> bool:
         raise ValidationError(f'Not valid questions')
 
 
-def parse_date(form: Form, str_date: str) -> bool:
+def parse_date(str_date: str) -> bool:
     try:
         if parse(str_date):
             return True

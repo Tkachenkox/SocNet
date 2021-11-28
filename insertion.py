@@ -67,6 +67,7 @@ def up():
 def delete():
     with app.app_context():
         db.session.query(Person).delete()
+        db.session.query(Role).delete()
         db.session.commit()
 
 

@@ -120,19 +120,21 @@ class TestService:
 
     def check_result(self, id: int, person_id: int, data: dict):
         try:
-            if not PersonService().check_person(id):
+            if not PersonService().check_person(person_id):
                 raise TestException("Person doesn't exist")
             if not self.__check_test(id):
                 raise TestException("Test doesn't exist")
             if not self.__check_test_result(id, person_id):
                 raise TestException(f"Person with id {id} doesn't begining this test")
-            
+
             count, correct = self.__compare_answers(id, data['answers'])
             if count == 0:
                 return False, 0
-
-            result, points = self.__calculate_result(person_id=person_id, count=count, correct=correct)
-            if result:
+                
+            points = self.__get_points(id)
+            print(points)
+            result, points = self.__calculate_result(person_id=person_id, count=count, correct=correct, max_points=points)
+            if result == 1:
                 return True, points
             return False, points
 
@@ -145,12 +147,17 @@ class TestService:
             raise TestException('Quantity of answers and correct answers are not equal')
         count = 0
         for i in range(len(answers)):
-            if (correct[i][f'correct_answer_{i}'] == answers[i][f'answer_{i}']):
+            if (correct[i] == answers[i]):
                 count += 1
         return count, len(correct)
 
     def __calculate_result(self, person_id: int, count: int, correct: int, max_points: int):
-        points = int(max_points * int((correct - count)/correct*100))
+        print(count, max_points, correct)
+        if correct == count:
+            points = int(max_points)
+        else:
+            points = int(max_points * int((correct - count)/correct*100))
+        print(points)
         result = PersonService().update_skill_point(person_id=person_id, added_points=points)
         return result, points
 
@@ -161,7 +168,7 @@ class TestService:
         answers_returnable = []
         index = 1
         for i in questions:
-                answers_returnable.append({f'correct_answer_{index}': i['correct_answer']})
+                answers_returnable.append(i['correct_answer'])
         return answers_returnable
 
     def __check_test(self, id: int) -> bool:
@@ -173,15 +180,26 @@ class TestService:
         except:
             return False
 
+    def __get_points(self, id: int) -> int:
+        test = Test.query.filter_by(id=id, remove_date=None).first()
+        return test.max_point
+
     def __check_test_result(self, id_test: int, id_person: int) -> bool:
         try:
-            test = TestResult.query.filter_by(test_id=id_test, person_id=id_person, remove_date=None)\
+            test = TestResult.query.filter_by(test_id=id_test, person_id=id_person, remove_date=None, end_date=None)\
                     .order_by(TestResult.begin_date.desc()).first()
             if test:
                 return True
             return False
         except:
             return False
+
+    def __insert_test_result(self,  id_test: int, id_person:int, point: int, correct_answers: int):
+        test_resut = TestResult.query.filter_by(test_id=id_test, person_id=id_person, remove_date=None, end_date=None)\
+            .order_by(TestResult.begin_date.desc()).first()
+        test_resut.end_date = datetime.utcnow()
+        test_resut.correct_answers = correct_answers
+        test_resut.additional_skill_point = point
 
     def __make_dict_without_questions(self, row: set) -> dict:
         return {
